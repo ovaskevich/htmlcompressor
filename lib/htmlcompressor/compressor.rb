@@ -1,4 +1,4 @@
-require "yui/compressor"
+require "yuicompressor"
 
 module HtmlCompressor
   class Compressor
@@ -464,18 +464,15 @@ module HtmlCompressor
     end
 
     def compress_javascript(source)
-      # set default javascript compressor
-      javaScriptCompressor = @options[:javascript_compressor]
-
-      if javaScriptCompressor.nil?
-        javaScriptCompressor = YUI::JavaScriptCompressor.new(
-          :munge => !@yuiJsNoMunge,
-          :preserve_semicolons => !@yuiJsDisableOptimizations,
-          :optimize => !@yuiJsDisableOptimizations,
-          :line_break => @yuiJsLineBreak
-        )
-      end
-
+  
+      params = {
+        :type => 'js'
+        :munge => !@yuiJsNoMunge,
+        :preserve_semicolons => !@yuiJsDisableOptimizations,
+        :optimize => !@yuiJsDisableOptimizations,
+        :line_break => @yuiJsLineBreak
+      }
+      
       # detect CDATA wrapper
       cdataWrapper = false
       if source =~ CDATA_PATTERN
@@ -483,7 +480,7 @@ module HtmlCompressor
         source = $1
       end
 
-      result = javaScriptCompressor.compress(source).strip
+      result = ::YUICompressor.compress(source, params).strip
 
       if cdataWrapper
         result = "<![CDATA[" + result + "]]>"
@@ -493,12 +490,14 @@ module HtmlCompressor
     end
 
     def compress_css_styles(source)
-      # set default css compressor
-      cssCompressor = @options[:css_compressor]
-
-      if cssCompressor.nil?
-        cssCompressor = YUI::CssCompressor.new(:line_break => @yuiCssLineBreak)
-      end
+    
+      params = {
+        :type => 'css'
+        :munge => !@yuiJsNoMunge,
+        :preserve_semicolons => !@yuiJsDisableOptimizations,
+        :optimize => !@yuiJsDisableOptimizations,
+        :line_break => @yuiJsLineBreak
+     }
 
       # detect CDATA wrapper
       cdataWrapper = false
@@ -507,7 +506,7 @@ module HtmlCompressor
         source = $1
       end
 
-      result = cssCompressor.compress(source)
+      result = ::YUICompressor.compress(source, params).strip
 
       if cdataWrapper
         result = "<![CDATA[" + result + "]]>"
