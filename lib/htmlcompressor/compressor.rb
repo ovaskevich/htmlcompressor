@@ -466,11 +466,11 @@ module HtmlCompressor
     def compress_javascript(source)
   
       params = {
-        :type => 'js'
+        :type => 'js',
         :munge => !@yuiJsNoMunge,
         :preserve_semicolons => !@yuiJsDisableOptimizations,
         :optimize => !@yuiJsDisableOptimizations,
-        :line_break => @yuiJsLineBreak
+        :line_break => @yuiJsLineBreak,
       }
       
       # detect CDATA wrapper
@@ -480,7 +480,8 @@ module HtmlCompressor
         source = $1
       end
 
-      result = ::YUICompressor.compress(source, params).strip
+      overridenCompressor = @options[:javascript_compressor]
+      result = overridenCompressor.nil? ? ::YUICompressor.compress(source, params).strip : overridenCompressor.compress(source).strip
 
       if cdataWrapper
         result = "<![CDATA[" + result + "]]>"
@@ -492,11 +493,8 @@ module HtmlCompressor
     def compress_css_styles(source)
     
       params = {
-        :type => 'css'
-        :munge => !@yuiJsNoMunge,
-        :preserve_semicolons => !@yuiJsDisableOptimizations,
-        :optimize => !@yuiJsDisableOptimizations,
-        :line_break => @yuiJsLineBreak
+        :type => 'css',
+        :line_break => @yuiCssLineBreak,
      }
 
       # detect CDATA wrapper
@@ -506,7 +504,8 @@ module HtmlCompressor
         source = $1
       end
 
-      result = ::YUICompressor.compress(source, params).strip
+      overridenCompressor = @options[:css_compressor]
+      result = overridenCompressor.nil? ? ::YUICompressor.compress(source, params).strip : overridenCompressor.compress(source).strip
 
       if cdataWrapper
         result = "<![CDATA[" + result + "]]>"
